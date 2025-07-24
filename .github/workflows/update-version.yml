@@ -8,25 +8,24 @@ jobs:
   update-json:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout all branches
+      - name: Checkout repo with all branches
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # fontos: az összes branch és commit elérhető lesz
-
+          fetch-depth: 0  # Fontos! Minden branch kell
+          
       - name: Set up Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Switch to gh-pages
+      - name: Switch to gh-pages and update version.json
         run: |
           git fetch origin gh-pages
-          git switch gh-pages
-
-      - name: Update version.json
-        run: |
+          git checkout gh-pages
+          
           VERSION=${GITHUB_REF#refs/tags/}
           echo "{ \"version\": \"${VERSION}\", \"url\": \"https://github.com/${{ github.repository }}/releases/latest/download/Update.zip\" }" > version.json
+
           git add version.json
-          git commit -m "Update version.json to ${VERSION}"
+          git commit -m "Update version.json to ${VERSION}" || echo "No changes to commit"
           git push origin gh-pages
